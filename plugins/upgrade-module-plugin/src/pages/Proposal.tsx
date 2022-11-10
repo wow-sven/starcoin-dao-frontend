@@ -9,7 +9,7 @@ import {
 import {useForm} from 'react-hook-form';
 import MainViewLayout from '../components/mainViewLayout';
 import TextBox from '../components/TextBox';
-import {createUpgradeProposal, Action} from "../utils/memberPluginAPI";
+import {createUpgradeProposal, Action} from "../utils/upgradePluginAPI";
 
 const From = (props) => {
 
@@ -44,13 +44,19 @@ const Proposal = () => {
     const [loading, setLoading] = useState(false);
     const {register, handleSubmit} = useForm();
     const [action, setAction] = useState<Action>({
-        title: "",
-        introduction: "",
-        description: "",
-        action_delay: 0n,
-        package_hash: "",
-        version: 1n,
-        enforced: false,
+        Info: {
+            title: "",
+            introduction: "",
+            description: "",
+        },
+        Propsal: {
+            action_delay: 0n,
+        },
+        Package: {
+            hash: "",
+            version: 1n,
+            enforced: false,
+        }
     });
 
     const onSubmit = async data => {
@@ -58,7 +64,7 @@ const Proposal = () => {
 
         setAction(data);
 
-//        await createUpgradeProposal(data)
+        await createUpgradeProposal(data)
 
         setLoading(false);
 
@@ -97,6 +103,12 @@ const Proposal = () => {
                 <TextBox size='xs' mb={2} mt={2}>
                     Info
                 </TextBox>
+
+                {
+                    Object.keys(action).map((v, i) => {
+                        return <div>aaa</div>
+                    })
+                }
 
                 <From
                     reg={register({required: true})}

@@ -1,5 +1,5 @@
 import { IDAO } from '../extpoints/dao_app';
-import { executeUpgradeProposal } from '../utils/upgradePluginAPI';
+import { executeUpgradeProposal } from '../utils/memberPluginAPI';
 
 class UpgradeProposalAction {
   dao: IDAO;
