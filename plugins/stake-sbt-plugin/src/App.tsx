@@ -3,7 +3,7 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { OverlayProvider } from './contexts/OverlayContext'
 import { DaoProvider } from './contexts/DaoContext'
 import { SubAppContext } from './root';
-import Proposal from './pages/Proposal';
+import Router from "./router/routes";
 
 const App = () => {
   return (
@@ -15,7 +15,7 @@ const App = () => {
         <ChakraProvider>
             <DaoProvider initDao={appInfo.dao}>
             <OverlayProvider>
-              <Proposal/>
+                <Router/>
             </OverlayProvider>
           </DaoProvider>
         </ChakraProvider>

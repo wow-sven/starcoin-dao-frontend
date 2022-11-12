@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "~1.6.0",
+    "@choc-ui/chakra-autocomplete": "^5.1.4",
     "@emotion/react": "^11.1.4",
     "@emotion/styled": "^11.0.0",
     "@garfish/bridge-react": "^1.10.2",
@@ -21,6 +22,7 @@
     "process": "0.11.10",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-hook-form": "^6.14.2",
     "react-images-upload": "^1.2.8",
     "react-router-dom": "^5.2.0",
     "redux": "^4.1.2",
@@ -29,8 +31,7 @@
     "typescript": "^4.1.2",
     "url-polyfill": "^1.1.12",
     "web-vitals": "^1.1.2",
-    "web3": "^1.6.1",
-    "react-hook-form": "^6.14.2"
+    "web3": "^1.6.1"
   },
   "browserslist": {
     "production": [

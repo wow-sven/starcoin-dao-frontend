@@ -6,7 +6,8 @@ import {
     InputGroup,
     InputLeftAddon,
     NumberInput,
-    NumberInputField
+    NumberInputField,
+    Spinner
 } from "@chakra-ui/react";
 import {useForm} from "react-hook-form";
 
@@ -34,36 +35,42 @@ const parseTitle = (title) => {
     let nTitle = ""
 
     title.split("_").forEach((v, i) => {
-        nTitle += i > 0 ? "" + v : v
+        nTitle += i > 0 ? " " + v : v
     })
 
     return nTitle[0].toUpperCase() + nTitle.substring(1, nTitle.length)
 }
 
-const parseItems = (obj) => {
+const parseItems = (obj, prex) => {
     const keys = Object.keys(obj)
     let items = Array<Item>()
     Object.values(obj).forEach((v, i) => {
 
+        let name = prex ? prex + "." + keys[i] : keys[i]
+
         let valueTypee = typeof v
 
+//        console.log(`${keys[i]} valueTypee ${valueTypee} ${valueTypee === "bigint"}`)
+
         if (valueTypee === "object") {
-            let sub = parseItems(v)
+            let sub = parseItems(v, keys[i])
             items = items.concat(keys[i] === "obj" ? sub : [{
                 title: parseTitle(keys[i]),
-                name: keys[i],
+                name: "",
                 defaultValue: "",
                 valueType: "",
                 type: ItemType.Title
             }, ...sub])
         } else {
-            items = items.concat({
-                title: parseTitle(keys[i]),
-                name: keys[i],
-                defaultValue: v,
-                valueType: typeof valueTypee,
-                type: ItemType.Input
-            })
+            if (v != "-") {
+                items = items.concat({
+                    title: parseTitle(keys[i]),
+                    name: name,
+                    defaultValue: v,
+                    valueType: typeof valueTypee,
+                    type: ItemType.Input
+                })
+            }
         }
     })
 
@@ -76,7 +83,7 @@ const FormItems = (props) => {
     const [items, setItems] = useState<Array<any>>([])
 
     useEffect(() => {
-        setItems([...parseItems(props.obj)])
+        setItems([...parseItems(props.obj, "")])
     }, [props.obj])
 
     return (
@@ -92,33 +99,40 @@ const FormItems = (props) => {
                         </TextBox>
                         : <FormControl key={i.toString()} id={v.name} mb={4}>
                             <InputGroup>
-                                <InputLeftAddon bg='transparent' w='16%'>
+                                <InputLeftAddon bg='transparent' w='20%'>
                                     <TextBox size='sm'>
                                         {v.title}
                                     </TextBox>
                                 </InputLeftAddon>
-                                {v.valueType == "number" ?
-                                    <NumberInput w='100%' defaultValue={v.defaultValue}>
-                                        <NumberInputField
-                                            ref={register({required: true})}
-                                            name={v.name}
-                                            borderTopStartRadius='0'
-                                            borderBottomStartRadius='0'
-                                        />
-                                    </NumberInput> :
-                                    <Input ref={register({required: true})}
-                                           defaultValue={v.defaultValue}
-                                           placeholder={v.title + "..."}
-                                           name={v.name}/>
+                                {   // BUG
+                                    v.valueType === "bigint" || v.valueType === "number"
+                                        ?
+                                        <NumberInput w='100%' defaultValue={v.defaultValue}>
+                                            <NumberInputField
+                                                ref={register({required: true})}
+                                                name={v.name}
+                                                borderTopStartRadius='0'
+                                                borderBottomStartRadius='0'
+                                            />
+                                        </NumberInput>
+                                        :
+                                        <Input ref={register({required: true})}
+                                               defaultValue={v.defaultValue}
+                                               placeholder={v.title + "..."}
+                                               name={v.name}/>
                                 }
                             </InputGroup>
                         </FormControl>
                 })
             }
 
-            <Button type='submit' my={4}>
-                Submit
-            </Button>
+            {
+                props.loading ?
+                    <Spinner margin='0 auto'/> :
+                    <Button type='submit' my={4}>
+                        Submit
+                    </Button>
+            }
 
         </Flex>
     )

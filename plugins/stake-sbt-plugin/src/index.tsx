@@ -1,78 +1,78 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import RootComponent from './root';
-import { IDAO } from './extpoints/dao_app';
+import {IDAO} from './extpoints/dao_app';
 import UpgradeProposalAction from './actions/upgrade_proposal_action';
 
 // 在首次加载和执行时会触发该函数
 export const provider = (props) => {
-   const root = props.dom
-     ? props.dom.querySelector("#root")
-     : document.querySelector("#root");
+    const root = props.dom
+        ? props.dom.querySelector("#root")
+        : document.querySelector("#root");
 
-   console.log("provider props:", props);
+    console.log("provider props:", props);
 
-   return {
-     render() {
-       ReactDOM.render(<RootComponent {...props} />, root);
-     },
-     destroy({ dom }) {
-       ReactDOM.unmountComponentAtNode(
-         dom ? dom.querySelector("#root") : document.querySelector("#root")
-       );
-     },
-   };
+    return {
+        render() {
+            ReactDOM.render(<RootComponent {...props} />, root);
+        },
+        destroy({dom}) {
+            ReactDOM.unmountComponentAtNode(
+                dom ? dom.querySelector("#root") : document.querySelector("#root")
+            );
+        },
+    };
 };
 
 export const setup = (dao: IDAO) => {
-  console.log("plugin setup")
+    console.log("plugin setup")
 
-  dao.registerApp({
-    name: "member_app",
-    activeWhen: "/members",
-    provider: (props) => {
-      props.dao = {
-        name: dao.name,
-        address: dao.address,
-        daoType: dao.daoType,
-      }
+    dao.registerApp({
+        name: "member_app",
+        activeWhen: "/members",
+        provider: (props) => {
+            props.dao = {
+                name: dao.name,
+                address: dao.address,
+                daoType: dao.daoType,
+            }
 
-      return provider(props)
-    },
-  })
+            return provider(props)
+        },
+    })
 
     dao.registerAction(new UpgradeProposalAction(dao))
 }
 
 export const teardown = () => {
-  console.log("plugin teardown")
+    console.log("plugin teardown")
 }
 
 // 这能够让子应用独立运行起来，以保证后续子应用能脱离主应用独立运行，方便调试、开发
 if (!window.__GARFISH__) {
-  const dao = {
-    name: "TestDAO",
-    address: "0x4e375BB50D5B32a965B6E783E55a7cef",
-    daoType: '0x4e375BB50D5B32a965B6E783E55a7cef::TESTDAO::TESTDAO',
-    registerApp: function(appInfo) {
-      console.log("register App:", appInfo);
+    const dao = {
+        name: "TestDAO",
+        address: "0x00000000000000000000000000000001::StarcoinDAO::StarcoinDAO",
+        daoType: '0x00000000000000000000000000000001::StarcoinDAO::StarcoinDAO',
+        registerApp: function (appInfo) {
+            console.log("register App:", appInfo);
 
-      const provider = appInfo.provider({
-        basename: process.env.NODE_ENV === 'production' ? '/plugins/upgrade-module-plugin' : '/',
-        dom: document,
-      });
+            const provider = appInfo.provider({
+                basename: process.env.NODE_ENV === 'production' ? '/plugins/upgrade-module-plugin' : '/',
+                dom: document,
+            });
 
-      provider.render();
-    },
-    registerAction: async function(action): Promise<string> {
-      console.log("register Action:", action);
-      return "ok"
+            provider.render();
+        },
+        registerAction: async function (action): Promise<string> {
+            console.log("register Action:", action);
+            return "ok"
+        }
     }
-  }
 
-  setup(dao);
+    setup(dao);
 
-  window.starcoin.request({
-    method: 'stc_requestAccounts',
-  })
+    window.starcoin.request({
+        method: 'stc_requestAccounts',
+    })
 }

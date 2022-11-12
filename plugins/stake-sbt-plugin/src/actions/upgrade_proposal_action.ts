@@ -1,5 +1,5 @@
 import { IDAO } from '../extpoints/dao_app';
-import { executeUpgradeProposal } from '../utils/memberPluginAPI';
+import { executeTokenAcceptProposal } from '../utils/stakeSBTPluginAPI';
 
 class UpgradeProposalAction {
   dao: IDAO;
@@ -11,7 +11,7 @@ class UpgradeProposalAction {
   }
 
   async execute(params: any) {
-    return executeUpgradeProposal(params.proposalId)
+    // return executeTokenAcceptProposal(params.proposalId)
   }
 }
 
