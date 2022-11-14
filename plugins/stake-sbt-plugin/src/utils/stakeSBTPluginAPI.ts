@@ -1,8 +1,8 @@
 import {utils, bcs} from "@starcoin/starcoin"
 import {hexlify} from '@ethersproject/bytes'
-import {callContract, getProvder} from "./stcWalletSdk";
+import {callContract, getWeb3Provder} from "./stcWalletSdk";
 import {nodeUrlMap} from "./consts";
-import {uint128, uint64} from "@starcoin/starcoin/dist/src/lib/runtime/serde";
+import {str, uint128, uint64} from "@starcoin/starcoin/dist/src/lib/runtime/serde";
 
 export type Types = {
     dao_type: string,
@@ -29,6 +29,9 @@ export async function stakeSBT(params: StakeParams): Promise<string> {
     const tyArgs = [params.dao_type, params.plugin_type]
     const args = [params.amount, params.lock_time]
 
+    console.log(tyArgs)
+    console.log(args)
+
     return await callContarctWithSigner(functionId, tyArgs, args)
 }
 
@@ -36,11 +39,11 @@ export interface UnstakeParams extends Types {
     id: string,
 }
 
-export function nweUnstakeParams(): UnstakeParams {
+export function nweUnstakeParams(dao_type: string, tokenType: string, id: string): UnstakeParams {
     return {
-        dao_type: "",
-        plugin_type: "",
-        id: ""
+        dao_type: dao_type,
+        plugin_type: tokenType,
+        id: id
     }
 }
 
@@ -61,26 +64,19 @@ export async function unstakeAllSBT(params: Types): Promise<string> {
     return await callContarctWithSigner(functionId, tyArgs, [])
 }
 
-//export interface queryStakeCount extends DaoType {
-//    id:string
-//}
-
-// TODO: 拿到数据后再来弄分页
 export type QueryStakeTypeResult = {
     title: string
     type: string
 }
 
-export async function queryStakeType(): Promise<Array<QueryStakeTypeResult>> {
-
+export async function queryStakeTokenType(daoType: string): Promise<Array<QueryStakeTypeResult>> {
     const result = await window.starcoin.request({
         method: 'state.list_resource',
         params: [
             '0x1',
             {
                 resource_types: [
-//                    '0x1::Config::Config<0x1::StakeToSBTPlugin::LockWeightConfig>',
-                    '0x1::Config::ModifyConfigCapabilityHolder<0x1::StakeToSBTPlugin::LockWeightConfig<0x00000000000000000000000000000001::StarcoinDAO::StarcoinDAO>'
+                    '0x1::Config::ModifyConfigCapabilityHolder<0x1::StakeToSBTPlugin::LockWeightConfig>'
                 ],
                 decode: true,
                 start_index: 0,
@@ -88,54 +84,73 @@ export async function queryStakeType(): Promise<Array<QueryStakeTypeResult>> {
             }
         ]
     })
-    
-    console.log(result)
 
     let type = new Array<QueryStakeTypeResult>()
 
     for (let key in result.resources) {
-
         const tmp = key.split(",")
 
-        const daoType = tmp[0].split("::")
+        if (!tmp[0].includes(daoType)) {
+            continue
+        }
 
         type = type.concat({
             type: tmp[1].replace(">>", "").trim(),
             title: tmp[1].replace(">>", "").trim().split("::")[2],
         })
     }
-
-    console.log(type);
-
     return type
-
 }
 
-export async function queryStakeCount(): Promise<number> {
-
-    const functionId = '0x1::StakeToSBTPlugin::query_stake_count'
-
-    return callContract(functionId, [], [window.starcoin.selectedAddress])
+export type  QueryTokenStakeLimitResult = {
+    lock_time: uint64,
+    weight: uint64
 }
 
-export async function queryStakeList(): Promise<Array<any>> {
-
+export async function queryTokenStakeLimit(daoType: string, tokenType: string): Promise<QueryTokenStakeLimitResult> {
+    const type = `0x1::Config::Config<0x1::StakeToSBTPlugin::LockWeightConfig<${daoType}, ${tokenType}>>`
     const result = await window.starcoin.request({
         method: 'state.list_resource',
         params: [
             '0x1',
             {
-                resource_types: [],
+                resource_types: [type],
                 decode: true,
                 start_index: 0,
-                max_size: 0
+                max_size: 100
+            }
+        ]
+    })
+    console.log(result)
+
+    return result.resources[type.replaceAll("0x1", "0x00000000000000000000000000000001")].json.payload.weight_vec[0]
+}
+
+export async function queryStakeCount(types: Types): Promise<number> {
+
+    const functionId = '0x1::StakeToSBTPlugin::query_stake_count'
+
+    return (await callContract(functionId, [types.dao_type, types.plugin_type], [window.starcoin.selectedAddress]))[0]
+}
+
+export async function queryStakeList(types: Types): Promise<any> {
+
+    let resType = `0x00000000000000000000000000000001::StakeToSBTPlugin::StakeList<${types.dao_type},${types.plugin_type}>`
+
+    const result  = await window.starcoin.request({
+        method: 'state.list_resource',
+        params: [
+            window.starcoin.selectedAddress,
+            {
+                resource_types: [resType],
+                decode: true,
+                start_index: 0,
+                max_size: 3
             }
         ]
     })
 
-    console.log(result)
-
-    return result
+    return Object.values(result.resources)[0].json
 }
 
 export interface createTokenAcceptProposalParams extends Types {
@@ -258,7 +273,16 @@ export async function executeWidgthProposal(types: Types, proposalId: string): P
 export async function callContarctWithSigner(functionId, tyArgs, args): Promise<string> {
     try {
 
-        const scriptFunction = await utils.tx.encodeScriptFunctionByResolve(functionId, tyArgs, args, nodeUrlMap[window.starcoin.networkVersion])
+        console.log(`functionId: ${functionId}`)
+        console.log(`tyArgs: [${tyArgs}]`)
+        console.log(`args: ${args}`)
+
+        const scriptFunction = await utils.tx.encodeScriptFunctionByResolve(
+            functionId,
+            tyArgs,
+            args,
+            nodeUrlMap[window.starcoin.networkVersion]
+        )
 
         // Multiple BcsSerializers should be used in different closures, otherwise, the latter will be contaminated by the former.
         const payloadInHex = (function () {
@@ -272,7 +296,7 @@ export async function callContarctWithSigner(functionId, tyArgs, args): Promise<
             expiredSecs: 10
         }
 
-        const starcoinProvider = await getProvder()
+        const starcoinProvider = await getWeb3Provder()
 
         return await starcoinProvider.getSigner().sendUncheckedTransaction(txParams)
 

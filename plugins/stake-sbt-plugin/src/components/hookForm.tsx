@@ -1,7 +1,7 @@
 import {
     Button,
     Flex,
-    FormControl,
+    FormControl, FormHelperText,
     Input,
     InputGroup,
     InputLeftAddon,
@@ -41,19 +41,19 @@ const parseTitle = (title) => {
     return nTitle[0].toUpperCase() + nTitle.substring(1, nTitle.length)
 }
 
-const parseItems = (obj, prex) => {
+const parseItems = (obj, prex, rules) => {
     const keys = Object.keys(obj)
     let items = Array<Item>()
-    Object.values(obj).forEach((v, i) => {
+    Object.values(obj).forEach((v: any, i) => {
 
         let name = prex ? prex + "." + keys[i] : keys[i]
 
-        let valueTypee = typeof v
+        let valueType = typeof v
 
 //        console.log(`${keys[i]} valueTypee ${valueTypee} ${valueTypee === "bigint"}`)
 
-        if (valueTypee === "object") {
-            let sub = parseItems(v, keys[i])
+        if (valueType === "object") {
+            let sub = parseItems(v, keys[i], rules)
             items = items.concat(keys[i] === "obj" ? sub : [{
                 title: parseTitle(keys[i]),
                 name: "",
@@ -67,9 +67,10 @@ const parseItems = (obj, prex) => {
                     title: parseTitle(keys[i]),
                     name: name,
                     defaultValue: v,
-                    valueType: typeof valueTypee,
+                    valueType: valueType,
                     type: ItemType.Input
                 })
+                console.log(items)
             }
         }
     })
@@ -77,13 +78,13 @@ const parseItems = (obj, prex) => {
     return items
 }
 
-const FormItems = (props) => {
+const HookForm = (props) => {
 
     const {register, handleSubmit} = useForm();
     const [items, setItems] = useState<Array<any>>([])
 
     useEffect(() => {
-        setItems([...parseItems(props.obj, "")])
+        setItems([...parseItems(props.obj, "", props.rules)])
     }, [props.obj])
 
     return (
@@ -107,7 +108,9 @@ const FormItems = (props) => {
                                 {   // BUG
                                     v.valueType === "bigint" || v.valueType === "number"
                                         ?
-                                        <NumberInput w='100%' defaultValue={v.defaultValue}>
+                                        <NumberInput w='100%'
+                                                     defaultValue={v.defaultValue}
+                                                     isReadOnly={props.rules ? props.rules.get(v.name) : false}>
                                             <NumberInputField
                                                 ref={register({required: true})}
                                                 name={v.name}
@@ -119,13 +122,13 @@ const FormItems = (props) => {
                                         <Input ref={register({required: true})}
                                                defaultValue={v.defaultValue}
                                                placeholder={v.title + "..."}
+                                               isReadOnly={props.rules ? props.rules.get(v.name) : false}
                                                name={v.name}/>
                                 }
                             </InputGroup>
                         </FormControl>
                 })
             }
-
             {
                 props.loading ?
                     <Spinner margin='0 auto'/> :
@@ -138,5 +141,5 @@ const FormItems = (props) => {
     )
 }
 
-export default FormItems
+export default HookForm
 

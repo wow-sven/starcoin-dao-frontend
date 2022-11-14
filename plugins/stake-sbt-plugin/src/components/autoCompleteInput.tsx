@@ -5,7 +5,7 @@ import {
     Avatar,
     FormControl,
     InputGroup,
-    InputLeftAddon
+    InputLeftAddon, FormHelperText
 } from '@chakra-ui/react';
 
 import {
@@ -60,6 +60,13 @@ const AutoCompleteInputWidget = (props) => {
                     </AutoComplete>
                 </Box>
             </InputGroup>
+            {
+                props.helper ?
+                <FormHelperText>
+                    {props.helper}
+                </FormHelperText> :
+                <div/>
+            }
         </FormControl>
     )
 }

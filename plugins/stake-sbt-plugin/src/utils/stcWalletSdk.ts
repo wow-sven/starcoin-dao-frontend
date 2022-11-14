@@ -1,6 +1,7 @@
 import {providers} from "@starcoin/starcoin"
 import {getLocalNetwork} from "./localHelper";
 import {Web3Provider} from "@starcoin/starcoin/dist/src/providers";
+import {nodeUrlMap} from "./consts";
 
 export async function requestAccounts() {
     return await window.starcoin.request({
@@ -15,25 +16,28 @@ export async function getAccounts() {
     })
 }
 
-export async function getProvder() {
+export async function getWeb3Provder() {
     const network = getLocalNetwork() || "main"
     return new providers.Web3Provider(window.starcoin, network);
 }
 
-//export function callRPC(function_id: string,
-//                        address: string,) {
-//
-//}
+export async function getRpcProvder() {
+    const network = nodeUrlMap[window.starcoin.networkVersion]
 
-export function callContract(function_id: string, type_args: any[], args: any[]): Promise<number> {
+    console.log(network)
 
-    console.log(getProvder())
+    return new providers.JsonRpcProvider(network);
+}
 
-    return getProvder.callV2({
+export async function callContract(function_id: string, type_args: any[], args: any[]): Promise<any> {
+
+    const starcoinProvider = await getRpcProvder()
+
+    return await starcoinProvider.callV2({
         function_id,
         type_args,
         args,
-    });
+    })
 }
 
 export function isValidateAddress(address: string) {

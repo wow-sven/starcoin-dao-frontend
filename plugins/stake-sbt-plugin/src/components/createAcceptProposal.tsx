@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import {Flex, useToast} from '@chakra-ui/react'
-import FormItems from "./formItems"
+import HookForm from "./hookForm"
 import {
     newCreateTokenAcceptProposalParams,
     createTokenAcceptProposal,
@@ -12,6 +12,14 @@ const CreateAcceptPropoalWidget = (props) => {
 
     const onSubmit = async data => {
         setLoading(true)
+        toast({
+            title: 'Tips',
+            description: "create token accept proposa success",
+            status: 'success',
+            duration: 3000,
+            position: 'top-right',
+            isClosable: true,
+        })
         createTokenAcceptProposal({
             ...data,
             dao_type: props.dao.daoType,
@@ -35,7 +43,7 @@ const CreateAcceptPropoalWidget = (props) => {
         <Flex
             direction='column'
         >
-            <FormItems
+            <HookForm
                 obj={newCreateTokenAcceptProposalParams()}
                 loading={loading}
                 onSubmit={onSubmit}

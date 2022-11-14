@@ -51,7 +51,7 @@ export const teardown = () => {
 // 这能够让子应用独立运行起来，以保证后续子应用能脱离主应用独立运行，方便调试、开发
 if (!window.__GARFISH__) {
     const dao = {
-        name: "TestDAO",
+        name: "StarcoinDAO",
         address: "0x00000000000000000000000000000001::StarcoinDAO::StarcoinDAO",
         daoType: '0x00000000000000000000000000000001::StarcoinDAO::StarcoinDAO',
         registerApp: function (appInfo) {

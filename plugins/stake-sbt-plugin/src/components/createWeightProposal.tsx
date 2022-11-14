@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react'
 import {Flex, useToast} from '@chakra-ui/react'
-import FormItems from "./formItems"
+import HookForm from "./hookForm"
 import {
     newCreateWeightProposalParams,
     createWeightProposal,
-    queryStakeType,
+    queryStakeTokenType,
     QueryStakeTypeResult
 } from '../utils/stakeSBTPluginAPI'
 import AutoCompleteInputWidget from './autoCompleteInput'
@@ -17,7 +17,7 @@ const CreateWeightProposalWidget = (props) => {
 
     useEffect(() => {
         if (tokenTypeOptions.length == 0) {
-            queryStakeType().then((v) => {
+            queryStakeTokenType(props.dao.dao_type).then((v) => {
                 setTokenTypeOptions([...v])
                 setLoading(false)
             }).catch(e => {
@@ -63,7 +63,7 @@ const CreateWeightProposalWidget = (props) => {
                 options={tokenTypeOptions.map(v => v.type)}
                 onChange={setTokenType}
             />
-            <FormItems
+            <HookForm
                 obj={newCreateWeightProposalParams()}
                 loading={loading}
                 onSubmit={onSubmit}
