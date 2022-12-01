@@ -16,29 +16,34 @@ type PluginCardProps = {
 }
 
 const PluginCard = ({daoId, plugin_info, installed, showDetail = true}: PluginCardProps) => {
-    const {injectedProvider: provider, walletAddress} = useSubAppContext();
+    const {injectedProvider: provider, walletAddress, errToast} = useSubAppContext();
     const [stared, setStared] = useState(false);
     const [starCount, setStarCount] = useState(plugin_info.star_count);
-    const toast = useToast({
-        title: 'Tips',
-        position: 'top-right',
-        isClosable: true,
-    });
+    // const toast = useToast({
+    //     title: 'Tips',
+    //     position: 'top-right',
+    //     isClosable: true,
+    // });
 
     const history = useHistory();
     const toastIdRef = React.useRef();
 
     const showToast = (desc: string, status: AlertStatus) => {
-
-        if (toastIdRef.current && toast.isActive(toastIdRef.current)) {
-            toast.update(toastIdRef.current, {description: desc, status: status});
-            return;
-        }
-
-        toastIdRef.current = toast({
-            description: desc,
-            status: status,
+        console.log(errToast);
+        errToast({
+            title:"test",
+            description:"hahahah",
         })
+
+        // if (toastIdRef.current && toast.isActive(toastIdRef.current)) {
+        //     toast.update(toastIdRef.current, {description: desc, status: status});
+        //     return;
+        // }
+
+        // toastIdRef.current = toast({
+        //     description: desc,
+        //     status: status,
+        // })
     }
 
     useEffect(() => {
@@ -51,9 +56,9 @@ const PluginCard = ({daoId, plugin_info, installed, showDetail = true}: PluginCa
             loadStarPlugin();
         }
 
-//        return () => {
-//            toast.closeAll();
-//        }
+        // return () => {
+        //     // toast.closeAll();
+        // }
     }, [daoId, plugin_info, walletAddress]);
 
     const onUninstallPlugin = async () => {

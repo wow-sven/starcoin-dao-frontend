@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { providers } from "@starcoin/starcoin"
 import { Dict } from "@chakra-ui/utils";
+import { Content } from 'src/extpoints/dao_app';
 
 export interface IDaoInfo {
   name: string,
@@ -20,6 +21,7 @@ export const SubAppContext = createContext<AppContext>({} as AppContext);
 export type SubAppProviderValue = {
   initDao: Record<string, any>;
   initTheme?: Dict;
+  errToast?:(content: Content) => void;
   getInjectedProvider(): providers.JsonRpcProvider;
   getWalletAddress(): string;
 };
@@ -29,7 +31,10 @@ export type SubAppProviderProps = {
   value: SubAppProviderValue;
 };
 
-export const SubAppProvider = ({ children, value: { initDao, initTheme, getInjectedProvider, getWalletAddress} }:SubAppProviderProps) => {
+export const SubAppProvider = (props) => {
+  
+  const { children, value: { initDao, initTheme, errToast, getInjectedProvider, getWalletAddress} }:SubAppProviderProps = props
+
   const [dao, _] = useState<IDaoInfo>({
     name: initDao.name,
     address: initDao.address,
@@ -59,6 +64,7 @@ export const SubAppProvider = ({ children, value: { initDao, initTheme, getInjec
         theme: initTheme,
         injectedProvider,
         walletAddress,
+        errToast,
       }}
     >
       {children}

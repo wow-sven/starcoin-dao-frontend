@@ -11,6 +11,7 @@ import { providers } from "@starcoin/starcoin"
 import App from './App';
 import './App.less';
 import { SubAppProvider } from './contexts/SubAppContext';
+import { Content } from './extpoints/dao_app';
 
 export const prefixCls = 'sub-app-react16';
 
@@ -21,6 +22,7 @@ export type AppInfo = {
   appRenderInfo: Record<string, any>;
   props: Record<string, any>;
   theme?: Dict;
+  errToast?:(content: Content) => void;
   dao: Record<string, any>;
   getInjectedProvider(): providers.JsonRpcProvider;
   getWalletAddress(): string;
@@ -32,6 +34,7 @@ const RootComponent = (appInfo: AppInfo) => {
     <SubAppProvider value={{
       initDao: appInfo.dao,
       initTheme: appInfo.theme,
+      errToast: appInfo.errToast,
       getInjectedProvider: appInfo.getInjectedProvider,
       getWalletAddress: appInfo.getWalletAddress,
      }}>

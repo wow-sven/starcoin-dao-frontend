@@ -13,6 +13,7 @@ import { useMetaData } from './MetaDataContext';
 import { useDaoAction } from './DaoActionContext';
 import { useCustomTheme } from './CustomThemeContext';
 import { useInjectedProvider } from './InjectedProviderContext';
+import { useOverlay } from './OverlayContext';
 
 export const SupportInnerPluginNames = [
   'inner-plugin://install-plugin-proposal-plugin',
@@ -35,6 +36,7 @@ export const DaoPluginProvider = ({ children }) => {
   const { daoMetaData } = useMetaData();
   const { injectedProvider, address } = useInjectedProvider();
   const { theme } = useCustomTheme();
+  const { errorToast, successToast, warningToast } = useOverlay();
   const { registerAction } = useDaoAction();
 
   const [loadedPlugins, setloadedPlugins] = useState([]);
@@ -54,12 +56,13 @@ export const DaoPluginProvider = ({ children }) => {
   };
 
   class PluginContext {
-    constructor(appInstance, name, address, daoType, theme) {
+    constructor(appInstance, name, address, daoType, theme, errorToast) {
       this.appInstance = appInstance;
       this.name = name;
       this.address = address;
       this.daoType = daoType;
       this.theme = theme;
+      this.errorToast = errorToast;
     }
 
     registerApp = async appInfo => {
@@ -145,6 +148,7 @@ export const DaoPluginProvider = ({ children }) => {
           daoMetaData.daoAddress,
           daoMetaData.daoId,
           theme,
+          errorToast,
         );
         plugin?.setup(ctx);
 

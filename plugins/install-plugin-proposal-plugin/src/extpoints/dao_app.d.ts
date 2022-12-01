@@ -20,11 +20,17 @@ declare interface IAction {
     execute: (params: any) => Promise<string>;
 }
 
+declare interface Content {
+    title:string,
+    description:string,
+}
+
 declare interface IDaoPluginContext {
     name: string,
     address: string, 
     daoType: string,
     theme?: Dict|undefined;
+    errorToast?:  (content: Content) => void;
     registerApp(app: IApp);
     registerAction(action: IAction);
     getInjectedProvider(): providers.JsonRpcProvider;

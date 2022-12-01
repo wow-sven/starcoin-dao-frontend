@@ -35,6 +35,7 @@ export const setup = (ctx: IDaoPluginContext) => {
     icon: VscExtensions,
     provider: (props) => {
       props.theme = ctx.theme;
+      props.errToast = ctx.errorToast;
       props.dao = {
         name: ctx.name,
         address: ctx.address,

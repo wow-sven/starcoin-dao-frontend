@@ -5,7 +5,10 @@ export const OverlayContext = createContext<{
   setMemberProposalModal: Dispatch<SetStateAction<boolean>>
 }>({} as any);
 
-export const OverlayProvider = ({ children }) => {
+export const OverlayProvider = (props) => {
+
+  const { children } = props;
+  
   const [memberProposalModal, setMemberProposalModal] = useState(false);
 
   return (
